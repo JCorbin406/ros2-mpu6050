@@ -29,7 +29,7 @@ source install/setup.bash
 
 - Connect the MPU6050 to your Raspberry Pi using the I2C interface
 - Default I2C address: `0x68`
-- Enable I2C on your Pi via `raspi-config` or `modprobe i2c-dev`
+- Enable I2C on your Pi via `raspi-config` or manually.
 
 ---
 
@@ -45,8 +45,10 @@ ros2 launch mpu6050 mpu6050.launch.py
 
 - `i2c_bus` (int): I2C bus number (e.g., `1` for `/dev/i2c-1`)
 - `i2c_address` (int): I2C address of the sensor (`104` for `0x68`)
-- `frame_id` (str): Frame name for the IMU data
 - `publish_rate` (float): Data publish frequency (Hz)
+- `accel_range` (int): Upper acceleration limit for the IMU.
+- `gyro_range` (int): Upper gyro limit for the IMU.
+- `calibration_samples` (int): Number of samples to be used for calibration.
 
 ---
 
