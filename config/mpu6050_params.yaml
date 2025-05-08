@@ -1,0 +1,8 @@
+mpu6050_node:
+  ros__parameters:
+    i2c_bus: 1                  # Optional, for compatibility with multi-bus configs
+    i2c_address: 104            # decimal for 0x68 (MPU6050 default)
+    accel_range: 8
+    gyro_range: 500
+    calibration_samples: 500
+    publish_rate: 50.0          # Hz
