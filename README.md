@@ -1,85 +1,107 @@
-# ros2-mpu6050
+# mpu6050 - ROS 2 IMU Interface Node
 
-ROS 2 driver for the MPU6050 6-axis Inertial Measurement Unit (IMU), combining a 3-axis accelerometer and 3-axis gyroscope. This package reads sensor data over I2C and publishes it as standard ROS 2 messages.
+This ROS 2 package provides a Python-based node that interfaces with the MPU6050 accelerometer and gyroscope sensor over I2C. It publishes filtered and bias-calibrated IMU data to the `/imu` topic using `sensor_msgs/msg/Imu`.
+
+---
 
 ## Features
 
-- Publishes acceleration and angular velocity
-- Supports basic calibration and configurable parameters
-- Designed for Raspberry Pi running ROS 2 Jazzy Jalisco
-- Easily integrable into larger robotic systems
+- Communicates with MPU6050 via I2C
+- Publishes accelerometer and gyroscope data in SI units
+- Applies Butterworth low-pass filtering to reduce noise
+- Supports calibration to remove sensor bias while preserving gravity
+- Fully configurable via YAML and launch files
+- Compatible with Raspberry Pi (tested on Pi 4 with ROS 2 Jazzy)
 
 ---
 
 ## Installation
 
-Clone this repository into your ROS 2 workspace:
+### Clone into your ROS 2 workspace
 
 ```bash
 cd ~/ros2_ws/src
-git clone git@github.com:JCorbin406/ros2-mpu6050.git
+git clone https://github.com/JCorbin406/mpu6050.git
+```
+### Build the workspace
+
+```bash
 cd ~/ros2_ws
-colcon build
+colcon build --packages-select mpu6050
 source install/setup.bash
 ```
 
 ---
 
-## Hardware Setup
-
-- Connect the MPU6050 to your Raspberry Pi using the I2C interface
-- Default I2C address: `0x68`
-- Enable I2C on your Pi via `raspi-config` or manually.
-
----
-
 ## Usage
 
-### Launch the node
+### Launch the IMU node with default parameters:
 
 ```bash
 ros2 launch mpu6050 mpu6050.launch.py
 ```
 
-### Parameters (in `config/mpu6050.yaml`)
+This loads configuration from:
+```
+mpu6050/config/mpu6050_params.yaml
+```
 
-- `i2c_bus` (int): I2C bus number (e.g., `1` for `/dev/i2c-1`)
-- `i2c_address` (int): I2C address of the sensor (`104` for `0x68`)
-- `publish_rate` (float): Data publish frequency (Hz)
-- `accel_range` (int): Upper acceleration limit for the IMU.
-- `gyro_range` (int): Upper gyro limit for the IMU.
-- `calibration_samples` (int): Number of samples to be used for calibration.
-
----
-
-## Topics
-
-- `/mpu6050/imu` (`sensor_msgs/msg/Imu`): IMU data including acceleration and angular velocity
-
----
-
-## Example Output
+You can also manually run the node:
 
 ```bash
-$ ros2 topic echo /mpu6050/imu
-linear_acceleration:
-  x: -0.03
-  y: 9.78
-  z: 0.12
-angular_velocity:
-  x: 0.01
-  y: -0.02
-  z: 0.00
+ros2 run mpu6050 mpu_node
 ```
 
 ---
 
-## License
+## Parameters
 
-Licensed under the [Apache License 2.0](LICENSE).
+You can customize behavior via the YAML config file:
+
+```yaml
+mpu6050_node:
+  ros__parameters:
+    i2c_bus: 1               # I2C bus (typically 1 on Raspberry Pi)
+    i2c_address: 104         # Decimal address (104 = 0x68)
+    accel_range: 8           # 2, 4, 8, or 16 (g)
+    gyro_range: 500          # 250, 500, 1000, or 2000 (deg/s)
+    calibration_samples: 100 # Number of samples to average during startup
+    publish_rate: 50.0       # Hz
+```
 
 ---
 
-## Author
+## Topic
 
-Jack Corbin — [JCorbin406](https://github.com/JCorbin406)
+The node publishes:
+
+| Topic | Type | Description |
+|-------|------|-------------|
+| `/imu` | `sensor_msgs/msg/Imu` | Filtered, bias-corrected IMU data |
+
+> Note: Orientation and covariance values are not provided by the MPU6050 directly.
+
+---
+
+## File Structure
+
+```
+mpu6050/
+├── config/
+│   └── mpu6050_params.yaml
+├── launch/
+│   └── mpu6050.launch.py
+├── mpu6050/
+│   ├── __init__.py
+│   ├── mpu6050.py           # Sensor driver
+│   └── mpu_node.py          # ROS 2 node
+├── package.xml
+└── setup.py
+```
+
+---
+
+## Maintainer
+
+Jack Corbin  
+[https://github.com/JCorbin406](https://github.com/JCORBIN406)
